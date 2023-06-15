@@ -1,10 +1,10 @@
 package com.smumo.inventoryservice.controller;
 
+import com.smumo.inventoryservice.dto.InventoryDTO;
 import com.smumo.inventoryservice.service.InventoryService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/inventory")
@@ -16,8 +16,8 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-    @GetMapping("/{productCode}")
-    public boolean isInStock(@PathVariable String productCode){
+    @GetMapping()
+    public List<InventoryDTO> isInStock(@RequestParam List<String> productCode){
         return inventoryService.isInInventory(productCode);
     }
 }
