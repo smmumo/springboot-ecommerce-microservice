@@ -17,11 +17,11 @@ import java.util.UUID;
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
-    public OrderServiceImpl(OrderRepository orderRepository, WebClient webClient) {
+    public OrderServiceImpl(OrderRepository orderRepository, WebClient.Builder webClient) {
         this.orderRepository = orderRepository;
-        this.webClient = webClient;
+        this.webClientBuilder = webClient;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
        //call inventory service and place order if product is in stock
 
-     InventoryDTO[] inventoryDTOSArray =   webClient.get()
+     InventoryDTO[] inventoryDTOSArray =   webClientBuilder.build().get()
                         .uri("http://localhost:8084/api/v1/inventory",
                                 uriBuilder -> uriBuilder.queryParam("productCode",productCodeList).build())
                                 .retrieve()
