@@ -13,7 +13,7 @@ public interface OrderService {
     List<Orders> getByCustomer(long customerId);
 
     Orders createOrder(Orders order);
-    void placeOrder(OrderRequestDTO orderRequestDTO);
+    String placeOrder(OrderRequestDTO orderRequestDTO);
 
     void cancelOrders(long orderId);
 }

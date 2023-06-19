@@ -2,6 +2,18 @@
 spring:
   application:
     name: email-service
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      template:
+        default-topic: notificationTopic
+      group-id: notificationId
+      #auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: event:com.smumo.emailservice.events.OrderPlacedEvent
 
 eureka:
   client:

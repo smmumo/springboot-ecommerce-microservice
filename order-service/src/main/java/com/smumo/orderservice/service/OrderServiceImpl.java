@@ -5,7 +5,9 @@ import com.smumo.orderservice.dto.OrderLineItemsDTO;
 import com.smumo.orderservice.dto.OrderRequestDTO;
 import com.smumo.orderservice.entity.OrderLineItems;
 import com.smumo.orderservice.entity.Orders;
+import com.smumo.orderservice.event.OrderPlacedEvent;
 import com.smumo.orderservice.repository.OrderRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,10 +20,12 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
+    private final KafkaTemplate<String,OrderPlacedEvent> kafkaTemplate;
 
-    public OrderServiceImpl(OrderRepository orderRepository, WebClient.Builder webClient) {
+    public OrderServiceImpl(OrderRepository orderRepository, WebClient.Builder webClient, KafkaTemplate kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.webClientBuilder = webClient;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void placeOrder(OrderRequestDTO orderRequestDTO) {
+    public String placeOrder(OrderRequestDTO orderRequestDTO) {
         Orders orders = new Orders();
         orders.setOrderNumber(UUID.randomUUID().toString());
        var orderItems = orderRequestDTO.getOrderLineItemsDTOList().stream().map(this::mapToDto).toList();
@@ -55,6 +59,8 @@ public class OrderServiceImpl implements OrderService {
      boolean allProductInStock =  Arrays.stream(inventoryDTOSArray).allMatch(InventoryDTO::isInStock);
      if(allProductInStock){
          orderRepository.save(orders);
+         kafkaTemplate.send("notificationTopic",new OrderPlacedEvent(orders.getOrderNumber()));
+         return  "Order Placed Successfully";
      }else{
          throw new IllegalArgumentException("Product Not In Stock ,Try Again");
      }
